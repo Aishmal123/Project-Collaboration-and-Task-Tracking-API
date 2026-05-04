@@ -1,20 +1,15 @@
-import dotenv from 'dotenv';
-dotenv.config();
-
-import { connectDB } from './config/db.js';
+import express from 'express';
 import projectRoutes from './routes/projectsRoutes.js';
 import taskRoutes from './routes/taskRoutes.js';
-import { app } from './server.js';
+import errorHandler from './middleware/errorMiddleware.js'
+const app = express();
+app.use(express.json());
 
-app.use('/project', projectRoutes);
-app.use('/task', taskRoutes);
+app.use('/projects', projectRoutes);
+app.use('/tasks', taskRoutes);
 app.get('/', (req, res) => {
-  res.send('Hello World');
+  res.send('Project-Collaboration-and-Task-Tracking-API');
 });
+app.use(errorHandler);
+export default app;
 
-connectDB();
-
-const port = process.env.PORT || 3002;
-app.listen(port, () => {
-  console.log(`Server is running on http://localhost:${port}`);
-});
