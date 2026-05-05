@@ -3,13 +3,16 @@ export const createTask = async(req,res,next)=>{
        try{
               const newTask=await task.create(req.body);
               return res.status(201).json({message :'Task created successfully', task: newTask});
+              if(!projectId || !title){
+                return res.status(400).json({message:"Project ID and title are required"});
+              }
        }
        catch(error){
               next(error);
        };
 }
-export  const getTasks = async (req, res) => {
-  const { projectId, status, priority } = req.query;
+export  const getTasks = async (req, res,next) => {
+  const { projectId, status, priority, page = 1 , limit=5 } = req.query;
 try{
   
   let filter = {};
@@ -17,7 +20,9 @@ try{
   if (status) filter.status = status;
   if (priority) filter.priority = priority;
 
-  const tasks = await task.find(filter);
+  const tasks = await task.find(filter)
+   .skip((page - 1) * limit)
+      .limit(Number(limit));
   res.json(tasks);
 }
 catch(error){
@@ -25,7 +30,7 @@ catch(error){
 }
 };
 
-export  const getTaskById = async (req, res) => {
+export  const getTaskById = async (req, res,next) => {
   try{
     const foundTask = await task.findById(req.params.id);
   res.json(foundTask);
@@ -38,7 +43,7 @@ export  const getTaskById = async (req, res) => {
   }
 };
 
-export  const updateTask = async (req, res) => {
+export  const updateTask = async (req, res,next) => {
   try{
   const updatedTask = await task.findByIdAndUpdate(req.params.id, req.body, { new: true });
   res.json(updatedTask);
@@ -51,7 +56,7 @@ if(!updatedTask){
   }
 };
 
-export  const deleteTask = async (req, res) => {
+export  const deleteTask = async (req, res,next) => {
 try{
   const {id} = req.params;
     const deletedTask = await task.findByIdAndDelete(req.params.id);

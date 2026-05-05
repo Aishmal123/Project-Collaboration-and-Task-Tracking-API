@@ -1,6 +1,6 @@
 import Project from "../models/projectSchema.js";
 
-export const createProject = async (req, res) => {
+export const createProject = async (req, res, next) => {
     try {
         const { name, description } = req.body;
         if (!name || !description) {
@@ -21,7 +21,7 @@ export const createProject = async (req, res) => {
     }
 };
 
-export const getProjects = async (req, res) => {
+export const getProjects = async (req, res, next) => {
     try {
         const projects = await Project.find();
         return res.status(200).json(projects);
@@ -30,7 +30,7 @@ export const getProjects = async (req, res) => {
     }
 };
 
-export const getProjectById = async (req, res) => {
+export const getProjectById = async (req, res, next) => {
     try {
         const { id } = req.params;
         const project = await Project.findById(id);
@@ -43,7 +43,7 @@ export const getProjectById = async (req, res) => {
     }
 };
 
-export const updateProject = async (req, res) => {
+export const updateProject = async (req, res, next) => {
     try {
         const { id } = req.params;
         const { name, description } = req.body;
@@ -61,7 +61,7 @@ export const updateProject = async (req, res) => {
     }
 };
 
-export const deleteProject = async (req, res) => {
+export const deleteProject = async (req, res, next) => {
     try {
         const { id } = req.params;
         const deletedProject = await Project.findByIdAndDelete(id);

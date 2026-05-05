@@ -29,6 +29,14 @@ const taskSchema = new mongoose.Schema({
     createdAt: {
         type: Date,
         default: Date.now
+    },
+    page: {
+        type: Number,
+        default:1
+    },
+    limit: {
+        type:Number,
+        default:5
     }
 });
 
