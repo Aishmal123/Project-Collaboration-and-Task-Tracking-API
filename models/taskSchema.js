@@ -30,6 +30,14 @@ const taskSchema = new mongoose.Schema({
         type: Date,
         default: Date.now
     },
+    owner:{
+        type:mongoose.Schema.Types.ObjectId,ref:'user',required:true
+
+    },
+    completed:{
+type:Boolean,
+ default:true
+    },
     page: {
         type: Number,
         default:1
