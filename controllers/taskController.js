@@ -1,81 +1,193 @@
-import task from "../models/taskSchema.js";
-export const createTask = async(req,res,next)=>{
-       try{
-              const {title ,description,priority,dueDate,completed}=req.body;
-              const task =new Task({
-                title,description,priority,dueDate,completed:completed ==='yes'|| completed===true,owner:req.user.id
-              });
-              const saved =await task.save(); 
-              return res.status(201).json({message :'Task created successfully', task: newTask});
-              if(!projectId || !title){
-                return res.status(400).json({message:"Project ID and title are required"});
-              }
-       }
-       catch(error){
-              next(error);
-       };
-} 
-export  const getTasks = async (req, res,next) => {
-  const { projectId, status, priority, page = 1 , limit=5 } = req.query;
-try{
-  const tasks= await Task.find({owner:req.user,id}).sort({createdAt :-1});
-  res.json({success:false,message:error})
-  // let filter = {};
-  // if (projectId) filter.projectId = projectId;
-  // if (status) filter.status = status;
-  // if (priority) filter.priority = priority;
+import Task from "../models/taskSchema.js";
 
-  // const tasks = await task.find(filter)
-  //  .skip((page - 1) * limit)
-  //     .limit(Number(limit));
-  // res.json(tasks);
-}
-catch(error){
-  next(error);
-}
-};
-
-export  const getTaskById = async (req, res,next) => {
-  try{
-    const Task = await task.findById(req.user.id);
-    if(!Task){
-      return  res.status(404).json({message: "task not Found"});
-    }
-    res.json(foundTask);
-  }
-  catch(error){
-    next(error);
-  }
-};
-
-export  const updateTask = async (req, res,next) => {
-  try{
-    const data={...req.body};
-    if(data.completed !== undefined){
-      data.completed=data.completed === 'yes' ||data.completed=== true 
-    }
-  const updatedTask = await task.findByIdAndUpdate({id: req.params.id, owner :  res.user.id},data,{new:true ,runValidators:true});
+// CREATE TASK
+export const createTask = async (req, res, next) => {
+  try {
+    const {
+      title,
+      description,
+      priority,
+      dueDate,
+      completed,
   
-  if(!updatedTask){
-    return res.status(404).json({message: "Task not Found"});
-  }
-  res.json(updatedTask); 
-  }
-  catch(error){
+      status,
+    } = req.body;
+
+    // VALIDATION
+    if (!title) {
+      return res.status(400).json({
+        success: false,
+        message: "title are required",
+      });
+    }
+
+    // CREATE TASK
+    const task = new Task({
+      title,
+      description,
+      priority,
+      status,
+      dueDate,
+      // projectId,
+      completed:
+        completed === true || completed === "true",
+
+      // USER FROM AUTH MIDDLEWARE
+      owner: req.user.id,
+    });
+
+    // SAVE TASK
+    const savedTask = await task.save();
+
+    return res.status(201).json({
+      success: true,
+      message: "Task created successfully",
+      task: savedTask,
+    });
+
+  } catch (error) {
+    console.log(error);
     next(error);
   }
 };
 
-export  const deleteTask = async (req, res,next) => {
-try{
-  const {id} = req.params;
-    const deletedTask = await task.findByIdAndDelete({_id: req.params.id,owner : req.user.id});
-    if (!deletedTask){
-    return res.status(404).json({message: "Task not Found"});
-  };
-  res.json({ message: "Task deleted" });
-}
-catch(error){
-  next(error);
-}
+
+
+// GET TASKS
+export const getTasks = async (req, res, next) => {
+  try {
+    const {
+      // projectId,
+      status,
+      priority,
+      page = 1,
+      limit = 5,
+    } = req.query;
+
+    let filter = {
+      owner: req.user.id,
+    };
+
+    // if (projectId) {
+    //   filter.projectId = projectId;
+    // }
+
+    if (status) {
+      filter.status = status;
+    }
+
+    if (priority) {
+      filter.priority = priority;
+    }
+
+    const tasks = await Task.find(filter)
+      .populate("projectId")
+      .sort({ createdAt: -1 })
+      .skip((page - 1) * limit)
+      .limit(Number(limit));
+
+    res.status(200).json({
+      success: true,
+      count: tasks.length,
+      tasks,
+    });
+
+  } catch (error) {
+    next(error);
+  }
+};
+
+
+
+// GET SINGLE TASK
+export const getTaskById = async (req, res, next) => {
+  try {
+    const foundTask = await Task.findById(req.params.id)
+      .populate("projectId");
+
+    if (!foundTask) {
+      return res.status(404).json({
+        success: false,
+        message: "Task not found",
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      task: foundTask,
+    });
+
+  } catch (error) {
+    next(error);
+  }
+};
+
+
+
+// UPDATE TASK
+export const updateTask = async (req, res, next) => {
+  try {
+    const data = { ...req.body };
+
+    if (data.completed !== undefined) {
+      data.completed =
+        data.completed === true ||
+        data.completed === "true";
+    }
+
+    const updatedTask = await Task.findOneAndUpdate(
+      {
+        _id: req.params.id,
+        owner: req.user.id,
+      },
+      data,
+      {
+        new: true,
+        runValidators: true,
+      }
+    );
+
+    if (!updatedTask) {
+      return res.status(404).json({
+        success: false,
+        message: "Task not found",
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      message: "Task updated successfully",
+      task: updatedTask,
+    });
+
+  } catch (error) {
+    next(error);
+  }
+};
+
+
+
+// DELETE TASK
+export const deleteTask = async (req, res, next) => {
+  try {
+    const deletedTask = await Task.findOneAndDelete({
+      _id: req.params.id,
+      owner: req.user.id,
+    });
+
+    if (!deletedTask) {
+      return res.status(404).json({
+        success: false,
+        message: "Task not found",
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      message: "Task deleted successfully",
+    });
+
+  } catch (error) {
+    next(error);
+  }
 };
