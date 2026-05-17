@@ -2,6 +2,7 @@ import Task from "../models/taskSchema.js";
 
 // CREATE TASK
 export const createTask = async (req, res, next) => {
+    console.log("req.user:", req.user); 
   try {
     const {
       title,
