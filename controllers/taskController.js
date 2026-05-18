@@ -1,8 +1,7 @@
 import Task from "../models/taskSchema.js";
 
-// CREATE TASK
 export const createTask = async (req, res, next) => {
-    console.log("req.user:", req.user); 
+  console.log("req.user:", req.user);
   try {
     const {
       title,
@@ -10,11 +9,10 @@ export const createTask = async (req, res, next) => {
       priority,
       dueDate,
       completed,
-  
       status,
     } = req.body;
 
-    // VALIDATION
+    
     if (!title) {
       return res.status(400).json({
         success: false,
@@ -22,7 +20,6 @@ export const createTask = async (req, res, next) => {
       });
     }
 
-    // CREATE TASK
     const task = new Task({
       title,
       description,
@@ -30,14 +27,13 @@ export const createTask = async (req, res, next) => {
       status,
       dueDate,
       // projectId,
-      completed:
-        completed === true || completed === "true",
+      completed: completed === true || completed === "true",
 
-      // USER FROM AUTH MIDDLEWARE
+      
       owner: req.user.id,
     });
 
-    // SAVE TASK
+    
     const savedTask = await task.save();
 
     return res.status(201).json({
@@ -45,16 +41,11 @@ export const createTask = async (req, res, next) => {
       message: "Task created successfully",
       task: savedTask,
     });
-
   } catch (error) {
     console.log(error);
     next(error);
   }
 };
-
-
-
-// GET TASKS
 export const getTasks = async (req, res, next) => {
   try {
     const {
@@ -92,19 +83,14 @@ export const getTasks = async (req, res, next) => {
       count: tasks.length,
       tasks,
     });
-
   } catch (error) {
     next(error);
   }
 };
 
-
-
-// GET SINGLE TASK
 export const getTaskById = async (req, res, next) => {
   try {
-    const foundTask = await Task.findById(req.params.id)
-      .populate("projectId");
+    const foundTask = await Task.findById(req.params.id).populate("projectId");
 
     if (!foundTask) {
       return res.status(404).json({
@@ -117,23 +103,18 @@ export const getTaskById = async (req, res, next) => {
       success: true,
       task: foundTask,
     });
-
   } catch (error) {
     next(error);
   }
 };
 
 
-
-// UPDATE TASK
 export const updateTask = async (req, res, next) => {
   try {
     const data = { ...req.body };
 
     if (data.completed !== undefined) {
-      data.completed =
-        data.completed === true ||
-        data.completed === "true";
+      data.completed = data.completed === true || data.completed === "true";
     }
 
     const updatedTask = await Task.findOneAndUpdate(
@@ -145,7 +126,7 @@ export const updateTask = async (req, res, next) => {
       {
         new: true,
         runValidators: true,
-      }
+      },
     );
 
     if (!updatedTask) {
@@ -160,15 +141,11 @@ export const updateTask = async (req, res, next) => {
       message: "Task updated successfully",
       task: updatedTask,
     });
-
   } catch (error) {
     next(error);
   }
 };
 
-
-
-// DELETE TASK
 export const deleteTask = async (req, res, next) => {
   try {
     const deletedTask = await Task.findOneAndDelete({
@@ -187,7 +164,6 @@ export const deleteTask = async (req, res, next) => {
       success: true,
       message: "Task deleted successfully",
     });
-
   } catch (error) {
     next(error);
   }

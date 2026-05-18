@@ -3,14 +3,12 @@ import validator from "validator";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 
-// const JWT_SECRET = process.env.JWT_SECRET || "your_jwt_secret";
 const JWT_SECRET = process.env.JWT_SECRET || "9f3d8c1a7b2e4d6f8c0a1b2c3d4e5f6g7h8i9j0k";
 const TOKEN_EXPIRES = "24h";
 
 const createToken = (userId) =>
   jwt.sign({ id: userId }, JWT_SECRET, { expiresIn: TOKEN_EXPIRES });
 
-// REGISTER
 export async function RegisterUser(req, res, next) {
   const { name, email, password } = req.body;
 
@@ -42,7 +40,6 @@ export async function RegisterUser(req, res, next) {
   }
 }
 
-// LOGIN
 export async function LoginUser(req, res, next) {
   const { email, password } = req.body;
 
@@ -72,7 +69,6 @@ export async function LoginUser(req, res, next) {
   }
 }
 
-// GET CURRENT USER
 export async function getCurrentUser(req, res, next) {
   try {
     const user = await User.findById(req.user.id).select("name email");
@@ -85,7 +81,6 @@ export async function getCurrentUser(req, res, next) {
   }
 }
 
-// UPDATE PROFILE
 export async function updateProfile(req, res, next) {
   const { name, email } = req.body;
 
@@ -111,7 +106,6 @@ export async function updateProfile(req, res, next) {
   }
 }
 
-// UPDATE PASSWORD
 export async function updatePassword(req, res, next) {
   const { currentPassword, newPassword } = req.body;
 
